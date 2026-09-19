@@ -1,0 +1,315 @@
+/* 🕹️ Retro Pixel "Life OS" Stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap');
+
+:root {
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-silkscreen: 'Silkscreen', monospace;
+  --font-vt: 'VT323', monospace;
+
+  --bg-color: #1a102f;
+  --panel-bg: #2d1b4e;
+  --panel-border: #4a2c82;
+  --text-color: #f4ecf7;
+  --accent-cyan: #00f0ff;
+  --accent-magenta: #ff007f;
+  --accent-yellow: #ffe600;
+  --accent-green: #00ff66;
+  --accent-orange: #ff9900;
+  
+  --window-header-bg: #4a2c82;
+  --window-header-text: #ffffff;
+}
+
+/* Background Wallpapers */
+body.bg-cyberpunk {
+  background: #0f0c1b url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop') no-repeat center center fixed;
+  background-size: cover;
+}
+
+body.bg-space {
+  background: #050510 radial-gradient(circle at 50% 50%, #1b1035 0%, #050510 100%);
+}
+
+body.bg-retro-grid {
+  background-color: #120826;
+  background-image: 
+    linear-gradient(rgba(255, 0, 127, 0.2) 1px, transparent 0),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.2) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: var(--font-silkscreen), monospace;
+  color: var(--text-color);
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 📺 CRT Scanlines Effect Overlay */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.35) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 4px, 6px 100%;
+  opacity: 0.8;
+  display: block;
+}
+
+.crt-overlay.disabled {
+  display: none;
+}
+
+/* CRT Screen Bloom / Glow */
+.crt-screen-glow {
+  box-shadow: inset 0 0 100px rgba(0, 240, 255, 0.15);
+}
+
+/* 🖥️ Top OS Bar */
+.top-bar {
+  height: 42px;
+  background: #15092b;
+  border-bottom: 3px solid var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 10000;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.top-bar .logo {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: var(--accent-yellow);
+  text-shadow: 2px 2px #ff007f;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-bar .team-badge {
+  font-size: 11px;
+  background: #2b144d;
+  border: 2px solid var(--accent-magenta);
+  padding: 2px 8px;
+  color: var(--accent-cyan);
+  border-radius: 4px;
+}
+
+.top-bar .bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.retro-btn {
+  font-family: var(--font-silkscreen);
+  font-size: 11px;
+  font-weight: bold;
+  background: #3b1e6d;
+  color: var(--accent-cyan);
+  border: 2px solid var(--accent-cyan);
+  padding: 4px 10px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #000;
+  transition: all 0.1s ease;
+}
+
+.retro-btn:hover {
+  background: var(--accent-cyan);
+  color: #000;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #ff007f;
+}
+
+.retro-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000;
+}
+
+/* 🖼️ Desktop Workspace Canvas */
+#desktop-canvas {
+  width: 100vw;
+  height: calc(100vh - 42px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 🪟 Retro Window Widget Container */
+.pixel-window {
+  position: absolute;
+  background: var(--panel-bg);
+  border: 3px solid var(--panel-border);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  min-height: 180px;
+  z-index: 10;
+  border-radius: 2px;
+}
+
+.pixel-window.active-window {
+  border-color: var(--accent-cyan);
+  box-shadow: 8px 8px 0px rgba(0, 240, 255, 0.25);
+}
+
+.window-header {
+  height: 32px;
+  background: var(--window-header-bg);
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: move;
+  border-bottom: 2px solid var(--panel-border);
+}
+
+.window-title {
+  font-family: var(--font-silkscreen);
+  font-size: 12px;
+  color: var(--accent-yellow);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.window-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.win-btn {
+  width: 20px;
+  height: 20px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  line-height: 18px;
+  text-align: center;
+  background: #1d0f36;
+  color: #fff;
+  border: 1px solid var(--accent-cyan);
+  cursor: pointer;
+}
+
+.win-btn.close-btn:hover {
+  background: #ff0055;
+  border-color: #ff0055;
+}
+
+.window-content {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+/* Custom Scrollbar */
+.window-content::-webkit-scrollbar {
+  width: 8px;
+}
+.window-content::-webkit-scrollbar-track {
+  background: #1a0f30;
+}
+.window-content::-webkit-scrollbar-thumb {
+  background: var(--accent-cyan);
+}
+
+/* 8-Bit Health & Progress Bar Component */
+.pixel-bar-container {
+  background: #120924;
+  border: 2px solid #5a3a91;
+  height: 20px;
+  width: 100%;
+  position: relative;
+  margin: 6px 0;
+  border-radius: 2px;
+}
+
+.pixel-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pixel-bar-fill.danger {
+  background: linear-gradient(90deg, #ff0055, #ff9900);
+}
+
+.pixel-bar-fill.energy {
+  background: linear-gradient(90deg, #ffaa00, #ffe600);
+}
+
+.pixel-bar-fill.mood {
+  background: linear-gradient(90deg, #ff007f, #aa00ff);
+}
+
+.pixel-bar-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-family: var(--font-pixel);
+  color: #fff;
+  text-shadow: 1px 1px #000;
+}
+
+/* Common Pixel Form Controls */
+.pixel-input {
+  width: 100%;
+  background: #150a29;
+  border: 2px solid var(--panel-border);
+  color: #fff;
+  font-family: var(--font-silkscreen);
+  font-size: 12px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  outline: none;
+}
+
+.pixel-input:focus {
+  border-color: var(--accent-cyan);
+}
+
+/* Footer Control Dock */
+.bottom-dock {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(21, 9, 43, 0.9);
+  border: 2px solid var(--accent-cyan);
+  padding: 6px 16px;
+  display: flex;
+  gap: 12px;
+  z-index: 10000;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+}

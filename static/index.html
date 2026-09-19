@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🕹️ Retro Life OS Dashboard</title>
+  <link rel="stylesheet" href="/static/css/retro_theme.css">
+  <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👾</text></svg>">
+</head>
+<body class="bg-retro-grid crt-screen-glow">
+
+  <!-- 📺 CRT Scanlines Effect Overlay -->
+  <div id="crt-overlay" class="crt-overlay"></div>
+
+  <!-- 🖥️ Top OS Navigation Bar -->
+  <div class="top-bar">
+    <div class="logo">
+      <span>🕹️ LIFE OS</span>
+      <span class="team-badge">AI TEAM: GEMINI [T1]</span>
+    </div>
+
+    <div class="bar-controls">
+      <button class="retro-btn" id="btn-sound-toggle">🔊 SOUND: ON</button>
+      <button class="retro-btn" id="btn-crt-toggle">📺 CRT: ON</button>
+      <button class="retro-btn" id="btn-theme-toggle">🎨 THEME</button>
+      <button class="retro-btn" id="btn-save-layout">💾 SAVE LAYOUT</button>
+      <span id="top-bar-clock" style="font-family: var(--font-pixel); font-size: 11px; color: var(--accent-yellow);">00:00:00</span>
+    </div>
+  </div>
+
+  <!-- 🖼️ Desktop Canvas Workspace -->
+  <div id="desktop-canvas">
+    <!-- Windows rendered dynamically by JS -->
+  </div>
+
+  <!-- ⚓ Bottom Dock for Quick Widget Toggles -->
+  <div class="bottom-dock">
+    <button class="retro-btn" onclick="LifeOS.toggleWidget('clock')">🕒 CLOCK</button>
+    <button class="retro-btn" onclick="LifeOS.toggleWidget('quests')">⚔️ QUESTS</button>
+    <button class="retro-btn" onclick="LifeOS.toggleWidget('memos')">📌 MEMOS</button>
+    <button class="retro-btn" onclick="LifeOS.toggleWidget('stats')">📊 STATS</button>
+  </div>
+
+  <!-- 📜 Life OS Core Scripts & Widget Modules -->
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/widgets/clock_widget.js"></script>
+  <script src="/static/js/widgets/quest_widget.js"></script>
+  <script src="/static/js/widgets/memo_widget.js"></script>
+  <script src="/static/js/widgets/stats_widget.js"></script>
+
+</body>
+</html>

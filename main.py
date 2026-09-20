@@ -13,8 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent
 init_db()
 
 app = FastAPI(
-    title="Retro Life OS Dashboard API",
-    description="Backend API for 8-Bit Retro Pixel Life OS Dashboard Web App",
+    title="Life OS Dashboard API",
+    description="Backend API for Modern Life OS Dashboard Web App",
     version="1.0.0"
 )
 
@@ -35,5 +35,5 @@ def read_root():
     return FileResponse(static_dir / "index.html")
 
 if __name__ == "__main__":
-    print("[Life OS] Starting Retro Life OS Server on http://localhost:8000 ...")
+    print("[Life OS] Starting Life OS Server on http://localhost:8000 ...")
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

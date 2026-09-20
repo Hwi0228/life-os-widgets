@@ -1,6 +1,7 @@
 /**
- * 🕹️ Life OS Core Engine
- * Manages desktop windows, drag-and-drop, retro web audio, layout saving, and widget registration.
+ * Life OS Core Engine (Modern edition)
+ * Manages desktop windows, drag-and-drop with optional grid snap,
+ * soft audio cues, layout saving, and widget registration.
  */
 
 window.LifeOS = (function() {
@@ -8,8 +9,9 @@ window.LifeOS = (function() {
   const activeWindows = {};
   let topZIndex = 10;
   let soundEnabled = true;
+  let snapToGrid = true;
+  const GRID_SIZE = 20;
 
-  // Web Audio Context for 8-Bit Retro Sound FX
   let audioCtx = null;
 
   function initAudio() {
@@ -32,50 +34,49 @@ window.LifeOS = (function() {
 
       const now = audioCtx.currentTime;
       if (type === 'click') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.05);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(680, now + 0.04);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
         osc.start(now);
         osc.stop(now + 0.05);
       } else if (type === 'success' || type === 'levelup') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(523.25, now); // C5
-        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-        osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
-        osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now);
-        osc.stop(now + 0.4);
-      } else if (type === 'delete') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.linearRampToValueAtTime(100, now + 0.1);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
         gain.gain.setValueAtTime(0.1, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.35);
         osc.start(now);
-        osc.stop(now + 0.1);
+        osc.stop(now + 0.35);
+      } else {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, now);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
       }
     } catch (e) {
-      console.warn("Audio play error:", e);
+      // Audio may be blocked until user gesture
     }
   }
 
-  // Register Widget Definition
+  function snap(value) {
+    if (!snapToGrid) return value;
+    return Math.round(value / GRID_SIZE) * GRID_SIZE;
+  }
+
   function registerWidget(config) {
-    // config: { id, title, defaultPos: {x, y, w, h}, renderContent: function(containerElement) }
     registeredWidgets[config.id] = config;
   }
 
-  // Create Window Element in DOM
   function createWindow(widgetId, pos = null) {
     const config = registeredWidgets[widgetId];
     if (!config) return;
 
     if (activeWindows[widgetId]) {
-      // Bring to front
       focusWindow(widgetId);
       return;
     }
@@ -86,8 +87,8 @@ window.LifeOS = (function() {
     const win = document.createElement('div');
     win.className = 'pixel-window active-window';
     win.id = `win-${widgetId}`;
-    win.style.left = `${defaultP.x}px`;
-    win.style.top = `${defaultP.y}px`;
+    win.style.left = `${snap(defaultP.x)}px`;
+    win.style.top = `${snap(defaultP.y)}px`;
     win.style.width = `${defaultP.w}px`;
     win.style.height = `${defaultP.h}px`;
     win.style.zIndex = topZIndex;
@@ -96,7 +97,7 @@ window.LifeOS = (function() {
       <div class="window-header" id="win-header-${widgetId}">
         <span class="window-title">${config.title}</span>
         <div class="window-actions">
-          <button class="win-btn close-btn" onclick="LifeOS.closeWidget('${widgetId}')">✕</button>
+          <button class="win-btn close-btn" onclick="LifeOS.closeWidget('${widgetId}')" title="Close">✕</button>
         </div>
       </div>
       <div class="window-content" id="win-content-${widgetId}"></div>
@@ -105,13 +106,9 @@ window.LifeOS = (function() {
     document.getElementById('desktop-canvas').appendChild(win);
     activeWindows[widgetId] = win;
 
-    // Focus on click
     win.addEventListener('mousedown', () => focusWindow(widgetId));
-
-    // Make Draggable
     makeDraggable(win, document.getElementById(`win-header-${widgetId}`));
 
-    // Render Widget Inside
     const contentElem = document.getElementById(`win-content-${widgetId}`);
     if (typeof config.renderContent === 'function') {
       config.renderContent(contentElem);
@@ -146,7 +143,6 @@ window.LifeOS = (function() {
     }
   }
 
-  // Drag and Drop Logic
   function makeDraggable(winElem, headerElem) {
     let posX = 0, posY = 0, initialX = 0, initialY = 0;
 
@@ -170,21 +166,30 @@ window.LifeOS = (function() {
       let newTop = winElem.offsetTop - posY;
       let newLeft = winElem.offsetLeft - posX;
 
-      // Keep within bounds
       if (newTop < 0) newTop = 0;
       if (newLeft < 0) newLeft = 0;
 
-      winElem.style.top = newTop + "px";
-      winElem.style.left = newLeft + "px";
+      // Live snap while dragging when enabled
+      if (snapToGrid) {
+        newTop = snap(newTop);
+        newLeft = snap(newLeft);
+      }
+
+      winElem.style.top = newTop + 'px';
+      winElem.style.left = newLeft + 'px';
     }
 
     function closeDragElement() {
       document.onmouseup = null;
       document.onmousemove = null;
+      // Final snap on release
+      if (snapToGrid) {
+        winElem.style.top = snap(winElem.offsetTop) + 'px';
+        winElem.style.left = snap(winElem.offsetLeft) + 'px';
+      }
     }
   }
 
-  // Save Layout to Backend
   async function saveLayout() {
     playRetroSound('click');
     const layouts = [];
@@ -218,14 +223,13 @@ window.LifeOS = (function() {
       });
       if (res.ok) {
         playRetroSound('success');
-        alert("💾 Widget Layout Saved!");
+        alert('Layout saved');
       }
     } catch (e) {
-      console.error("Failed to save layout:", e);
+      console.error('Failed to save layout:', e);
     }
   }
 
-  // Load Layout from Backend
   async function loadLayout() {
     try {
       const res = await fetch('/api/layout');
@@ -237,15 +241,21 @@ window.LifeOS = (function() {
           saved.forEach(item => {
             if (!registeredWidgets[item.widget_id]) return;
             savedIds.add(item.widget_id);
-
             if (item.visible) {
               createWindow(item.widget_id, {
-                x: item.x, y: item.y, w: item.w, h: item.h
+                x: item.x,
+                y: item.y,
+                w: item.w,
+                h: item.h
               });
+              const win = activeWindows[item.widget_id];
+              if (win && item.z_index) {
+                win.style.zIndex = item.z_index;
+                if (item.z_index > topZIndex) topZIndex = item.z_index;
+              }
             }
           });
 
-          // Open newly registered widgets even when an older layout is already saved.
           Object.keys(registeredWidgets).forEach(widgetId => {
             const config = registeredWidgets[widgetId];
             if (!savedIds.has(widgetId) && config.defaultVisible !== false) {
@@ -256,52 +266,73 @@ window.LifeOS = (function() {
         }
       }
     } catch (e) {
-      console.warn("Could not load layout, initializing defaults:", e);
+      console.warn('Could not load layout, initializing defaults:', e);
     }
 
-    // Default startup windows
+    // Default startup windows (snapped)
     createWindow('clock', { x: 40, y: 40, w: 300, h: 250 });
     createWindow('stats', { x: 360, y: 40, w: 320, h: 260 });
-    createWindow('quests', { x: 40, y: 310, w: 420, h: 320 });
-    createWindow('memos', { x: 480, y: 310, w: 340, h: 320 });
+    createWindow('quests', { x: 40, y: 320, w: 420, h: 320 });
+    createWindow('memos', { x: 480, y: 320, w: 340, h: 320 });
     createWindow('habits', { x: 840, y: 40, w: 360, h: 520 });
   }
 
-  // Setup Event Listeners & Timers
   function initControls() {
-    // CRT toggle
     const crtBtn = document.getElementById('btn-crt-toggle');
     const crtOverlay = document.getElementById('crt-overlay');
-    crtBtn.addEventListener('click', () => {
-      playRetroSound('click');
-      crtOverlay.classList.toggle('disabled');
-      const isOff = crtOverlay.classList.contains('disabled');
-      crtBtn.textContent = isOff ? '📺 CRT: OFF' : '📺 CRT: ON';
-    });
+    if (crtBtn && crtOverlay) {
+      crtBtn.addEventListener('click', () => {
+        playRetroSound('click');
+        crtOverlay.classList.toggle('enabled');
+        const isOn = crtOverlay.classList.contains('enabled');
+        crtBtn.textContent = isOn ? 'Scanlines: On' : 'Scanlines: Off';
+      });
+    }
 
-    // Sound toggle
     const soundBtn = document.getElementById('btn-sound-toggle');
-    soundBtn.addEventListener('click', () => {
-      soundEnabled = !soundEnabled;
-      soundBtn.textContent = soundEnabled ? '🔊 SOUND: ON' : '🔇 SOUND: OFF';
-      if (soundEnabled) playRetroSound('click');
-    });
+    if (soundBtn) {
+      soundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.textContent = soundEnabled ? '🔊 Sound' : '🔇 Sound';
+        if (soundEnabled) playRetroSound('click');
+      });
+    }
 
-    // Theme Switcher
-    const themes = ['bg-retro-grid', 'bg-space', 'bg-cyberpunk'];
+    // Grid snap toggle
+    const snapBtn = document.getElementById('btn-snap-toggle');
+    if (snapBtn) {
+      snapBtn.addEventListener('click', () => {
+        playRetroSound('click');
+        snapToGrid = !snapToGrid;
+        snapBtn.textContent = snapToGrid ? 'Grid Snap: On' : 'Grid Snap: Off';
+        snapBtn.classList.toggle('active-snap', snapToGrid);
+        // Snap all open windows immediately when enabling
+        if (snapToGrid) {
+          Object.values(activeWindows).forEach(win => {
+            win.style.top = snap(win.offsetTop) + 'px';
+            win.style.left = snap(win.offsetLeft) + 'px';
+          });
+        }
+      });
+    }
+
+    const themes = ['bg-soft-grid', 'bg-modern-dark', 'bg-space'];
     let currentThemeIdx = 0;
     const themeBtn = document.getElementById('btn-theme-toggle');
-    themeBtn.addEventListener('click', () => {
-      playRetroSound('click');
-      document.body.classList.remove(themes[currentThemeIdx]);
-      currentThemeIdx = (currentThemeIdx + 1) % themes.length;
-      document.body.classList.add(themes[currentThemeIdx]);
-    });
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        playRetroSound('click');
+        document.body.classList.remove(themes[currentThemeIdx]);
+        currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+        document.body.classList.add(themes[currentThemeIdx]);
+      });
+    }
 
-    // Save Layout Button
-    document.getElementById('btn-save-layout').addEventListener('click', saveLayout);
+    const saveBtn = document.getElementById('btn-save-layout');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveLayout);
+    }
 
-    // Live Top Bar Clock
     setInterval(() => {
       const clockElem = document.getElementById('top-bar-clock');
       if (clockElem) {
@@ -311,7 +342,6 @@ window.LifeOS = (function() {
     }, 1000);
   }
 
-  // Document Ready Setup
   document.addEventListener('DOMContentLoaded', () => {
     initControls();
     setTimeout(loadLayout, 300);

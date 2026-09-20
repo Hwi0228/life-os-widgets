@@ -1,18 +1,18 @@
-# 🕹️ Retro Pixel "Life OS" Dashboard
+# ✨ Life OS Dashboard
 
-A modular, 8-bit/16-bit pixel-art styled **Life OS Dashboard** web application. Built with a **Python (FastAPI)** backend and a retro pixel-art frontend.
+A modular **Life OS Dashboard** web application. Built with a **Python (FastAPI)** backend and a modern, clean frontend (previously retro pixel-art; redesigned in Turn 4).
 
-Unlike a single-purpose app, Life OS is a **multi-widget dashboard** where users can track quests (todos), manage focus time, stick memo notes, monitor life status stats (HP/Energy/Focus/Mood), and customize widget layouts on a retro OS desktop screen.
+Unlike a single-purpose app, Life OS is a **multi-widget dashboard** where users can track quests (todos), manage focus time, stick memo notes, monitor life status stats (HP/Energy/Focus/Mood), build daily habits with streaks, and customize widget layouts with optional **grid snap** alignment.
 
 ---
 
 ## 🤖 AI Team Collaboration Protocol
 
 This repository is built sequentially by an AI Team:
-1. **Gemini** (Turn 1 - *Current*): Project setup, Core Dashboard Shell, Drag/Toggle system, CRT FX, Base Widgets (Clock/Pomodoro, RPG Quest Log, Sticky Memos, Life Stats Gauge).
-2. **ChatGPT** (Turn 2 - *Current*): Daily Habit & Streak Tracker with persistent completion history.
-3. **Claude** (Turn 3): Next feature implementation.
-4. **Grok** (Turn 4): Next feature implementation.
+1. **Gemini** (Turn 1): Project setup, Core Dashboard Shell, Drag/Toggle system, CRT FX, Base Widgets (Clock/Pomodoro, RPG Quest Log, Sticky Memos, Life Stats Gauge).
+2. **ChatGPT** (Turn 2): Daily Habit & Streak Tracker with persistent completion history.
+3. **Claude** (Turn 3): (pending / next).
+4. **Grok** (Turn 4 - *Current*): Modern UI redesign (replacing 8-bit aesthetic) + snap-to-grid widget alignment.
 
 ### 📜 Commit Guidelines
 - Commit under Git Username: `Hwi0228`

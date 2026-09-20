@@ -73,6 +73,26 @@ def init_db():
     )
     """)
 
+    # Daily Habits & Streaks
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS habits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        emoji TEXT DEFAULT '✅',
+        archived INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS habit_logs (
+        habit_id INTEGER NOT NULL,
+        completed_on TEXT NOT NULL,
+        PRIMARY KEY (habit_id, completed_on),
+        FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
+    )
+    """)
+
     # Seed initial quests if table is empty
     cursor.execute("SELECT COUNT(*) FROM quests")
     if cursor.fetchone()[0] == 0:
@@ -86,6 +106,19 @@ def init_db():
         INSERT INTO quests (title, category, exp_reward, completed)
         VALUES (?, ?, ?, ?)
         """, initial_quests)
+
+    # Seed initial habits if table is empty
+    cursor.execute("SELECT COUNT(*) FROM habits")
+    if cursor.fetchone()[0] == 0:
+        initial_habits = [
+            ("💧", "Drink water"),
+            ("🧘", "5-minute meditation"),
+            ("💻", "Code for 25 minutes")
+        ]
+        cursor.executemany("""
+        INSERT INTO habits (emoji, name)
+        VALUES (?, ?)
+        """, initial_habits)
 
     # Seed initial memos if empty
     cursor.execute("SELECT COUNT(*) FROM memos")

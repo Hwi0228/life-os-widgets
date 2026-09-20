@@ -232,11 +232,24 @@ window.LifeOS = (function() {
       if (res.ok) {
         const saved = await res.json();
         if (saved && saved.length > 0) {
+          const savedIds = new Set();
+
           saved.forEach(item => {
-            if (item.visible && registeredWidgets[item.widget_id]) {
+            if (!registeredWidgets[item.widget_id]) return;
+            savedIds.add(item.widget_id);
+
+            if (item.visible) {
               createWindow(item.widget_id, {
                 x: item.x, y: item.y, w: item.w, h: item.h
               });
+            }
+          });
+
+          // Open newly registered widgets even when an older layout is already saved.
+          Object.keys(registeredWidgets).forEach(widgetId => {
+            const config = registeredWidgets[widgetId];
+            if (!savedIds.has(widgetId) && config.defaultVisible !== false) {
+              createWindow(widgetId, config.defaultPos);
             }
           });
           return;
@@ -251,6 +264,7 @@ window.LifeOS = (function() {
     createWindow('stats', { x: 360, y: 40, w: 320, h: 260 });
     createWindow('quests', { x: 40, y: 310, w: 420, h: 320 });
     createWindow('memos', { x: 480, y: 310, w: 340, h: 320 });
+    createWindow('habits', { x: 840, y: 40, w: 360, h: 520 });
   }
 
   // Setup Event Listeners & Timers

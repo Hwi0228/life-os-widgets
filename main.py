@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 
 from backend.database import init_db
-from backend.routers import system, todos, notes, clock, layout
+from backend.routers import system, todos, notes, clock, layout, habits
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -24,6 +24,7 @@ app.include_router(todos.router)
 app.include_router(notes.router)
 app.include_router(clock.router)
 app.include_router(layout.router)
+app.include_router(habits.router)
 
 # Mount static files
 static_dir = BASE_DIR / "static"

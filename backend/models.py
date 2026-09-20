@@ -51,3 +51,16 @@ class WidgetLayoutUpdate(BaseModel):
     h: int
     visible: bool
     z_index: int
+
+
+class HabitCreate(BaseModel):
+    name: str
+    emoji: str = "✅"
+
+class HabitUpdate(BaseModel):
+    name: Optional[str] = None
+    emoji: Optional[str] = None
+    archived: Optional[bool] = None
+
+class HabitToggle(BaseModel):
+    completed: bool
